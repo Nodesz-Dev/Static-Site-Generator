@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html(self):
@@ -51,3 +51,55 @@ class TestHTMLNode(unittest.TestCase):
         node2 = LeafNode(None, "No Tag - Just text - with a side of unused props", {"href":"www.bing.com"})
         self.assertEqual(node2.to_html(), "No Tag - Just text - with a side of unused props")
 
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_multiple_children(self):
+        child_node1 = LeafNode("span", "child1")
+        child_node2 = LeafNode("p", "child2")
+        parent_node = ParentNode("div", [child_node1, child_node2])
+        self.assertEqual(parent_node.to_html(), "<div><span>child1</span><p>child2</p></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+
+    def test_to_html_with_different_tree_depths(self):
+        node_right_grandchild = LeafNode("b", "right grandchild")
+        node_right_child = ParentNode("span", [node_right_grandchild])
+
+        node_left_child1 = LeafNode("a", "left child1", {"href": "www.child1.com"})
+        node_left_child2 = LeafNode("p", "left child2")
+
+        parent_node = ParentNode("span", [node_left_child1, node_left_child2, node_right_child])
+
+        self.assertEqual(parent_node.to_html(), f'<span><a href="www.child1.com">left child1</a><p>left child2</p><span><b>right grandchild</b></span></span>')
+
+    def test_to_html_with_empty_children_list(self):
+        parent_node = ParentNode("p", [])
+        self.assertEqual(parent_node.to_html(), "<p></p>")
+
+    def test_to_html_with_no_child_value(self):
+        parent_node = ParentNode("p", None)
+        with self.assertRaisesRegex(ValueError, "Error: Children are required"):
+            temp = parent_node.to_html()
+
+    def test_to_html_with_no_tag_value(self):
+        parent_node = ParentNode(None, "Child")
+        with self.assertRaisesRegex(ValueError, "Error: Tag is required"):
+            parent_node.to_html()
+
+   
+
+    
+
+
+if __name__ == "__main__":
+    unittest.main()
