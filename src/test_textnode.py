@@ -88,7 +88,10 @@ class TestTestNodeToHTML(unittest.TestCase):
 
     def test_special_characters_in_text(self):
         # Test converting a TextNode with special characters in the text value
-        pass
+        node = TextNode("Special Characters!?*", TextType.TEXT)
+        result = text_node_to_html_node(node)
+        self.assertEqual(result.tag, None)
+        self.assertEqual(result.value, "Special Characters!?*")
 
 class TestSplitNodeDelimiter(unittest.TestCase):
     def test_split_node_delimiter(self):
