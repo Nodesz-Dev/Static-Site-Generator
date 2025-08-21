@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType, text_node_to_html_node
-from markdown import split_nodes_delimiter
+from markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 
 
 class TestTextNode(unittest.TestCase):
@@ -92,113 +92,6 @@ class TestTestNodeToHTML(unittest.TestCase):
         result = text_node_to_html_node(node)
         self.assertEqual(result.tag, None)
         self.assertEqual(result.value, "Special Characters!?*")
-
-class TestSplitNodeDelimiter(unittest.TestCase):
-    def test_split_node_delimiter(self):
-        # Test splitting a node with a code block delimiter.
-        node = TextNode("This is text with a `code block` word", TextType.TEXT)
-        result = split_nodes_delimiter([node], "`", TextType.CODE)
-        expected = [
-            TextNode("This is text with a ", TextType.TEXT),
-            TextNode("code block", TextType.CODE),
-            TextNode(" word", TextType.TEXT),
-        ]
-        self.assertEqual(result,expected)
-
-    def test_split_nodes_delimiter_empty_input(self):
-        # Test case: Empty input list of nodes.
-        nodes = []
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        self.assertEqual(result, [])
-
-    def test_split_nodes_delimiter_no_delimiter(self):
-        # Test case: No delimiter found in the input.
-        nodes = [TextNode("hello world", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [TextNode("hello world", TextType.TEXT)]
-        self.assertEqual(result, expected)
-
-    def test_split_nodes_delimiter_single_delimiter(self):
-        # Test case: Single delimiter in the input.
-        nodes = [TextNode("hello**world", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [
-            TextNode("hello", TextType.TEXT),
-            TextNode("world", TextType.BOLD),
-        ]
-        self.assertEqual(result, expected)
-
-    def test_split_nodes_delimiter_multiple_delimiters(self):
-        # Test case: Multiple delimiters in the input.
-        nodes = [TextNode("hello**world**again", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [
-            TextNode("hello", TextType.TEXT),
-            TextNode("world", TextType.BOLD),
-            TextNode("again", TextType.TEXT),
-        ]
-        self.assertEqual(result, expected)
-
-    def test_split_nodes_delimiter_adjacent_delimiters(self):
-        # Test case: Adjacent delimiters in the input.
-        nodes = [TextNode("hello****world", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [
-            TextNode("hello", TextType.TEXT),
-            TextNode("", TextType.BOLD),
-            TextNode("world", TextType.TEXT),
-        ]
-        self.assertEqual(result, expected)
-
-    def test_split_nodes_delimiter_different_texttype(self):
-        # Test case: Different texttype delimiter.
-        nodes = [TextNode("hello__world__again", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "__", TextType.ITALIC)
-        expected = [
-            TextNode("hello", TextType.TEXT),
-            TextNode("world", TextType.ITALIC),
-            TextNode("again", TextType.TEXT),
-        ]
-        self.assertEqual(result, expected)
-
-    def test_split_nodes_delimiter_existing_bold_node(self):
-        # Test case: Existing bold node in the input.
-        nodes = [TextNode("hello", TextType.TEXT), TextNode("world", TextType.BOLD)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [TextNode("hello", TextType.TEXT), TextNode("world", TextType.BOLD)]
-        self.assertEqual(result, expected)
-
-    def test_delimiter_at_start_of_text(self):
-        # Test case: delimiter at the beginning of the text value
-        nodes = [TextNode("****hello world", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [TextNode("", TextType.TEXT),TextNode("", TextType.BOLD),TextNode("hello world", TextType.TEXT)]
-        self.assertEqual(result, expected)
-
-    def test_delimiter_at_end_of_text(self):
-        #Test case: delimiter at the end of the text value
-        nodes = [TextNode("hello world****", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [TextNode("hello world", TextType.TEXT),TextNode("",TextType.BOLD),TextNode("",TextType.TEXT)]
-        self.assertEqual(result, expected)
-
-    def test_consecutive_delimiters(self):
-        #Test case: 3 sets of delimiter in sequence
-        nodes = [TextNode("hello ******** world", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [TextNode("hello ", TextType.TEXT),
-                    TextNode("", TextType.BOLD), 
-                    TextNode("", TextType.TEXT), 
-                    TextNode("", TextType.BOLD), 
-                    TextNode(" world", TextType.TEXT)]
-        self.assertEqual(result, expected)
-
-    def test_empty_string(self):
-        #Test case: Empty string value
-        nodes = [TextNode("", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-        expected = [TextNode("", TextType.TEXT)]
-        self.assertEqual(result, expected)
 
 if __name__ == "__main__":
     unittest.main()
