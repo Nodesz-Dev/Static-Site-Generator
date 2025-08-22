@@ -3,19 +3,19 @@ import re
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
-    
+
     for node in old_nodes:
-        if node.texttype == TextType.TEXT:
+        #if node.texttype == TextType.TEXT:
             split_nodes = []
             sections = node.text.split(delimiter)
             for i in range(len(sections)):
                 if i % 2 == 0:
-                    split_nodes.append(TextNode(sections[i], TextType.TEXT))
+                    split_nodes.append(TextNode(sections[i], node.texttype))
                 elif i % 2 > 0:
                     split_nodes.append(TextNode(sections[i], text_type))
             new_nodes.extend(split_nodes)
-        else:
-            new_nodes.append(node)
+        #else:
+         #   new_nodes.append(node)
 
 
     return new_nodes
@@ -86,3 +86,13 @@ def split_nodes_link(old_nodes):
             new_nodes.append(TextNode(sections[-1], TextType.TEXT))
 
     return new_nodes
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.TEXT)]
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+
+    return nodes
