@@ -288,6 +288,91 @@ class TestMarkdownBlockToBlockType(unittest.TestCase):
         block_type = block_to_block_type(block)
         expected = BlockType.PARAGRAPH
         self.assertEqual(expected, block_type)
+
+class TestParagraphToHtmlNode(unittest.TestCase):
+    def test_paragraph_to_html_node(self):
+        block = "This is a paragraph"
+        html_node = paragraph_to_html_node(block)
+        self.assertEqual(html_node.tag, "p")
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    
+
+class TestHeadingToHtmlNode(unittest.TestCase):
+    def test_heading_to_html_node(self):
+        block = "# Heading"
+        html_node = heading_to_html_node(block)
+        self.assertEqual(html_node.tag, "h1")
+
+    def test_invalid_heading_count(self):
+        block = "#"
+        with self.assertRaises(ValueError):
+            heading_to_html_node(block)
+
+class TestCodeToHtmlNode(unittest.TestCase):
+    def test_code_to_html_node(self):
+        block = "```\ncode\n```"
+        html_node = code_to_html_node(block)
+        self.assertEqual(html_node.tag, "pre")
+
+    def test_invalid_code_block(self):
+        block = "```\ncode"
+        with self.assertRaises(ValueError):
+            code_to_html_node(block)
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
+
+class TestQuoteToHtmlNode(unittest.TestCase):
+    def test_quote_to_html_node(self):
+        block = "> quote"
+        html_node = quote_to_html_node(block)
+        self.assertEqual(html_node.tag, "blockquote")
+
+    def test_invalid_quote_block(self):
+        block = "quote"
+        with self.assertRaises(ValueError):
+            quote_to_html_node(block)
+
+class TestOrderedListToHtmlNode(unittest.TestCase):
+    def test_ordered_list_to_html_node(self):
+        block = "1. item"
+        html_node = ordered_list_to_html_node(block)
+        self.assertEqual(html_node.tag, "ol")
+
+class TestUnorderedListToHtmlNode(unittest.TestCase):
+    def test_unordered_list_to_html_node(self):
+        block = "- item"
+        html_node = unordered_list_to_html_node(block)
+        self.assertEqual(html_node.tag, "ul")
     
 if __name__ == "__main__":
     unittest.main()
