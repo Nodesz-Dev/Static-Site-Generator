@@ -40,7 +40,7 @@ def block_to_block_type(block):
     i = 1
     if block.startswith(f"{i}. "):
         for line in split_lines:
-            if not line.startswith("{i}. "):
+            if not line.startswith(f"{i}. "):
                 return BlockType.PARAGRAPH
             i += 1
         return BlockType.ORDERED_LIST

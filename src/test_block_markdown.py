@@ -238,6 +238,15 @@ class TestMarkdownBlockToBlockType(unittest.TestCase):
         expected = BlockType.QUOTE
         self.assertEqual(expected, block_type)
 
+    def test_block_to_block_type_quote_multiple_lines(self):
+        block0 = ">This is a quote block\n>This is a quote block\n>This is a quote block"
+        block1 = ">This is a quote block\nThis is a quote block\n>This is a quote block"
+        block_type0 = block_to_block_type(block0)
+        block_type1 = block_to_block_type(block1)
+        expected = BlockType.QUOTE
+        self.assertEqual(expected, block_type0)
+        self.assertNotEqual(expected, block_type1)
+
     def test_block_to_block_type_invalid_quote(self):
         block = "->This is a quote block"
         block_type = block_to_block_type(block)
@@ -250,17 +259,35 @@ class TestMarkdownBlockToBlockType(unittest.TestCase):
         expected = BlockType.ORDERED_LIST
         self.assertEqual(expected, block_type)
 
-    def test_block_to_block_type_ordered_list(self):
+    def test_block_to_block_type_invalid_ordered_list(self):
         block = "1. This is a ordered list block\n2. This is an ordered list block\n2. This is an ordered list block\n4. This is an ordered list block"
         block_type = block_to_block_type(block)
         expected = BlockType.ORDERED_LIST
         self.assertNotEqual(expected, block_type)
 
     def test_block_to_block_type_unordered_list(self):
-        block = "- This is a unordered lsit block\n- This is a unordered lsit block\n>- This is a unordered lsit block\n- This is a unordered lsit block\n"
+        block = "- This is a unordered lsit block\n- This is a unordered lsit block\n- This is a unordered lsit block\n- This is a unordered lsit block"
+        block_type = block_to_block_type(block)
+        expected = BlockType.UNORDERED_LIST
+        self.assertEqual(expected, block_type)
+
+    def test_block_to_block_type_invalid_unordered_list(self):
+        block = "- This is a unordered lsit block\n>- This is a unordered lsit block\n- This is a unordered lsit block\n- This is a unordered lsit block"
         block_type = block_to_block_type(block)
         expected = BlockType.UNORDERED_LIST
         self.assertNotEqual(expected, block_type)
+
+    def test_block_to_block_type_inline_markdown(self):
+        block = "This is a _paragraph_ block"
+        block_type = block_to_block_type(block)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(expected, block_type)
+
+    def test_block_to_block_empty(self):
+        block = ""
+        block_type = block_to_block_type(block)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(expected, block_type)
     
 if __name__ == "__main__":
     unittest.main()
