@@ -30,17 +30,6 @@ def CopySourceFiles(src, dst, cleardir=False):
         else:
             raise Exception(f"Error: Something went wrong with file at path {file}")
 
-def extract_title(markdown):
-    lines = markdown.split("\n")
-
-    for line in lines:
-        if line.startswith("#") and not line.startswith("##"):
-            stripped_line = line.strip("# ")
-            print(stripped_line)
-            return stripped_line
-    
-    raise Exception("Error: No Header found")
-
 def generate_page():
     pass
 

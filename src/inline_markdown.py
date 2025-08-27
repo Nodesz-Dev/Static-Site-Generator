@@ -1,6 +1,17 @@
 from textnode import *
 import re
 
+def extract_title(markdown):
+    lines = markdown.split("\n")
+
+    for line in lines:
+        line = line.strip(" ")
+        if line.startswith("#") and not line.startswith("##"):
+            stripped_line = line.strip("# ")
+            return stripped_line
+    
+    raise Exception("Error: No Header found")
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
 
