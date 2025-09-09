@@ -83,7 +83,7 @@ class TestTestNodeToHTML(unittest.TestCase):
         node = TextNode("This is an image", TextType.IMAGE, "www.image.com")
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "img")
-        self.assertEqual(html_node.value, None)
+        self.assertEqual(html_node.value, "")
         self.assertEqual(html_node.props, {"src": "www.image.com", "alt": "This is an image"})
 
     def test_special_characters_in_text(self):

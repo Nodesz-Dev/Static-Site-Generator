@@ -15,10 +15,10 @@ def markdown_to_blocks(markdown):
     split_blocks = markdown.split("\n\n")
     full_blocks = []
     for block in split_blocks:
-        stripped_block = block.strip()
-        if not stripped_block:
+        block = block.strip()
+        if not block:
             continue
-        full_blocks.append(stripped_block)
+        full_blocks.append(block)
 
     return full_blocks
 
@@ -39,8 +39,8 @@ def block_to_block_type(block):
             if not line.startswith("- "):
                 return BlockType.PARAGRAPH
         return BlockType.UNORDERED_LIST
-    i = 1
-    if block.startswith(f"{i}. "):
+    if block.startswith(f"1. "):
+        i = 1
         for line in split_lines:
             if not line.startswith(f"{i}. "):
                 return BlockType.PARAGRAPH
@@ -54,7 +54,8 @@ def markdown_to_html_node(markdown):
     children = []
 
     for block in markdown_block:
-        children.append(block_to_html_node(block))
+        html_node = block_to_html_node(block)
+        children.append(html_node)
 
     return ParentNode("div", children, None)
 
@@ -95,7 +96,7 @@ def heading_to_html_node(block):
         raise ValueError(f"Invalid heading count: {hash_amount}")
     text = block[hash_amount + 1:]
     children = text_to_children(text)
-    return ParentNode(f"h{hash_amount}", children, None)
+    return ParentNode(f"h{hash_amount}", children)
 
 def code_to_html_node(block):
     if not block.startswith("```") or not block.endswith("```"):
@@ -123,8 +124,8 @@ def ordered_list_to_html_node(block):
     for line in lines:
         text = line[3:]
         children = text_to_children(text)
-        html_nodes.append(ParentNode("li", children, None))
-    return ParentNode("ol", html_nodes, None)
+        html_nodes.append(ParentNode("li", children))
+    return ParentNode("ol", html_nodes)
 
 def unordered_list_to_html_node(block):
     lines = block.split("\n")
@@ -132,13 +133,14 @@ def unordered_list_to_html_node(block):
     for line in lines:
         text = line[2:]
         children = text_to_children(text)
-        html_nodes.append(ParentNode("li", children, None))
-    return ParentNode("ul", html_nodes, None)
+        html_nodes.append(ParentNode("li", children))
+    return ParentNode("ul", html_nodes)
 
 def text_to_children(text):
     inline_markdown = text_to_textnodes(text)
     children = []
     for textnode in inline_markdown:
-        children.append(text_node_to_html_node(textnode))
+        html_node = text_node_to_html_node(textnode)
+        children.append(html_node)
 
     return children
