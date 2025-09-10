@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from block_markdown import markdown_to_html_node
 from inline_markdown import extract_title
 
@@ -14,9 +15,9 @@ def main():
     CopySourceFiles(STATIC_DIRECTORY, PUBLIC_DIRECTORY, True)
 
     if check_paths():
-        generate_page(os.path.join(CONTENT_DIRECTORY, "index.md"),
+        recursive_generate_page(CONTENT_DIRECTORY,
                         TEMPLATE_PATH,
-                        os.path.join(PUBLIC_DIRECTORY, "index.html"))
+                        PUBLIC_DIRECTORY)
     else:
         raise Exception("Something went wrong, a path is missing")
 
@@ -41,6 +42,18 @@ def CopySourceFiles(src, dst, cleardir=False):
             CopySourceFiles(os.path.join(src, file), dirpath)
         else:
             raise Exception(f"Error: Something went wrong with file at path {file}")
+
+def recursive_generate_page(content_directory, template_path, destination_directory):
+    file_list = os.listdir(content_directory)
+
+    for file in file_list:
+        full_path = os.path.join(content_directory, file)
+        dest_path = os.path.join(destination_directory, file)
+        if os.path.isfile(full_path):
+            dest_path = Path(dest_path).with_suffix(".html")
+            generate_page(full_path, template_path, dest_path)
+        elif os.path.isdir(full_path):
+            recursive_generate_page(full_path, template_path, dest_path)
 
 def generate_page(from_path, template_path, dest_path):
     print (f" Generating page from {from_path} to {dest_path} using {template_path}")
