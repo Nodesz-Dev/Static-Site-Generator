@@ -1,23 +1,29 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 from block_markdown import markdown_to_html_node
 from inline_markdown import extract_title
 
-PUBLIC_DIRECTORY = "/home/brain/workspace/github.com/Static-Site-Generator/public"
+DOCS_DIRECTORY = "/home/brain/workspace/github.com/Static-Site-Generator/docs"
 STATIC_DIRECTORY = "/home/brain/workspace/github.com/Static-Site-Generator/static"
 CONTENT_DIRECTORY = "/home/brain/workspace/github.com/Static-Site-Generator/content"
 TEMPLATE_PATH = "/home/brain/workspace/github.com/Static-Site-Generator/template.html"
 
 
 def main():
+    Base_path = "/"
 
-    CopySourceFiles(STATIC_DIRECTORY, PUBLIC_DIRECTORY, True)
+    if len(sys.argv) > 0:
+        Base_path = sys.argv[0]
+
+    CopySourceFiles(STATIC_DIRECTORY, DOCS_DIRECTORY, True)
 
     if check_paths():
         recursive_generate_page(CONTENT_DIRECTORY,
                         TEMPLATE_PATH,
-                        PUBLIC_DIRECTORY)
+                        DOCS_DIRECTORY,
+                        Base_path)
     else:
         raise Exception("Something went wrong, a path is missing")
 
@@ -43,7 +49,7 @@ def CopySourceFiles(src, dst, cleardir=False):
         else:
             raise Exception(f"Error: Something went wrong with file at path {file}")
 
-def recursive_generate_page(content_directory, template_path, destination_directory):
+def recursive_generate_page(content_directory, template_path, destination_directory, base_path):
     file_list = os.listdir(content_directory)
 
     for file in file_list:
@@ -51,11 +57,11 @@ def recursive_generate_page(content_directory, template_path, destination_direct
         dest_path = os.path.join(destination_directory, file)
         if os.path.isfile(full_path):
             dest_path = Path(dest_path).with_suffix(".html")
-            generate_page(full_path, template_path, dest_path)
+            generate_page(full_path, template_path, dest_path, base_path)
         elif os.path.isdir(full_path):
-            recursive_generate_page(full_path, template_path, dest_path)
+            recursive_generate_page(full_path, template_path, dest_path, base_path)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print (f" Generating page from {from_path} to {dest_path} using {template_path}")
 
     markdown_file = open(from_path, "r")
@@ -73,6 +79,9 @@ def generate_page(from_path, template_path, dest_path):
     template_contents = template_contents.replace("{{ Title }}", title)
     template_contents = template_contents.replace("{{ Content }}", html_content)
 
+    template_contents = template_contents.replace('href="/', f'href="{base_path}')
+    template_contents = template_contents.replace('src="/', f'src="{base_path}')
+
     dest_dirs = os.path.dirname(dest_path)
     if dest_dirs != "":
         os.makedirs(dest_dirs, exist_ok=True)
@@ -88,7 +97,7 @@ def check_paths():
     if not os.path.exists(os.path.join(CONTENT_DIRECTORY, "index.md")):
         print ("index.md does not exist")
         all_clear = False
-    if not os.path.exists(PUBLIC_DIRECTORY):
+    if not os.path.exists(DOCS_DIRECTORY):
         print ("Public Path does not exist")
         all_clear = False
     if not os.path.exists(TEMPLATE_PATH):
